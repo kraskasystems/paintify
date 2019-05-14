@@ -1,0 +1,30 @@
+### Mandatory for all
+
+- Level of difficulty
+	- Choose a project which fits your skills
+	- Harder projects give bonus points
+	- In doubt, choose the easier project and make it good
+- Clean code
+	- Valid syntax
+	- No risky language features (as pointed out in the lecture)
+	- Strict mode
+	- Consistent code
+		- Double vs. single quotes
+		- Function declaration vs. expression
+		- Spaces vs. tabs for indentation
+	- Consistent naming (camelCase vs. underscore_case)
+	- Comments
+	- "Readable code" (use new lines to group statements and functions)
+	- No unnecessary code (unused variables, functions, unnecessary semicolons)
+- Execution
+	- Executes without throwing errors
+	- Handles edge cases correctly
+	- Handles wrong user data gracefully
+	- Handles bad user behavior gracefully
+	- Prohibits [XSS](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)) attacks (as mentioned in the lecture)
+- Requirements
+	- Provides all required features
+- Setup
+	- There should be no special setup except `npm install`
+	- Check if the repository contains all the necessary code
+	- Should work "out of the box"

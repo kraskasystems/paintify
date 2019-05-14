@@ -1,0 +1,16 @@
+{
+  "name": "paintify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://r-n-d.informatik.hs-augsburg.de:8080/javascript-ss19/paintify.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

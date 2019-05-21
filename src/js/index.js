@@ -15,8 +15,15 @@ import '@/css/style.css';
 
 const init = function (){
 
-  console.log('Hello from Paintify');
+  const canvas = function (){
+    let elem = document.createElement('canvas');
+    elem.setAttribute('class', 'layer');
 
+    return elem;
+  };
+
+  const stage = document.getElementById('stage');
+  stage.appendChild(canvas());
 };
 
 window.addEventListener('load', init);

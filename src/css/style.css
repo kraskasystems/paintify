@@ -1,0 +1,23 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 5% 80% 15%;
+}
+
+#toolBar {
+  background-color: red;
+}
+
+#stage {
+  background-color: yellow;
+}
+
+#layerPanel {
+  background-color: greenyellow;
+}

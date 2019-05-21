@@ -1,4 +1,7 @@
 'use strict';
+
+import Tool from '@/js/classes/Tool';
+
 /*
 * Attention follow these rules:
 * 1. Use strict mode: "use strict"
@@ -11,6 +14,10 @@
 */
 
 const assHole = 'hey';
+
+const tool = new Tool();
+
+tool.test = 'test';
 
 const test = (p) => {console.log(p);};
 

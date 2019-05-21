@@ -13,6 +13,7 @@ Useful commands:<br>
 `npm run prod`  - executes webpack for production<br>
 `npm run watch` - executes webpack and watches the files<br>
 `npm run serve` - use a webpack dev server on port 8080<br>
+`npm run lint`  - check if you are using our conventions
 
 ### HTML and CSS editing:
 

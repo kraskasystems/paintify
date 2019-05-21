@@ -1,6 +1,6 @@
 'use strict';
 
-import Tool from '@/js/classes/Tool';
+import '@/css/style.css';
 
 /*
 * Attention follow these rules:
@@ -13,12 +13,10 @@ import Tool from '@/js/classes/Tool';
 * 7. Cleanup before production
 */
 
-const assHole = 'hey';
+const init = function (){
 
-const tool = new Tool();
+  console.log('Hello from Paintify');
 
-tool.test = 'test';
+};
 
-const test = (p) => {console.log(p);};
-
-test(assHole);
+window.addEventListener('load', init);

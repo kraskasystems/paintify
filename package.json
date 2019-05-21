@@ -1,7 +1,7 @@
 {
   "name": "paintify",
   "version": "1.0.0",
-  "description": "",
+  "description": "Paintify - a creative painting tool",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,6 +11,6 @@
     "url": "https://r-n-d.informatik.hs-augsburg.de:8080/javascript-ss19/paintify.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Konstantin Kraska - Linda Ma",
   "license": "ISC"
 }

@@ -17,7 +17,15 @@ Useful commands:<br>
 
 ### HTML and CSS editing:
 
-+ To edit the html file work in `dist/index.html`
++ To edit the html file work in `src/static/index.html` (html-webpack-plugin is used for dist)
 + To edit css rules edit only `src/css/style.css`
 
+## Font-Awesome support
 
+To keep package size low icons have to be imported specifically.
+Usage flow:
+
+1. Go to `index.js`
+2. Extend icon import `import { faCoffee } from '@fortawesome/free-solid-svg-icons';` and add your icon
+3. Add icon to library `library.add( faCoffee );` -> comma separated ( faCoffee, fa..., fa...)
+4. Go to your html file e.g. index.html and use your icon as `<i class="fas fa-coffee"></i>`

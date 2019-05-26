@@ -14,29 +14,21 @@
 /*ToolBar*/
 #toolBar {
   display: grid;
-  grid-template-rows: 10% 10% 10% 5% 5% 5% 5%;
+  grid-template-rows: 10% 10% 10% 5% 5% 5% 5% 7%;
   background-color: #33424C;
   overflow: hidden;
 }
 
 .fa-paint-brush{
   color: #1AE2B2;
-  padding: 30% 20% 20% 30%;
+  padding: 50% 20% 20% 30%;
   grid-row: 2;
-}
-
-.fa-paint-brush:hover {
-  color: white;
 }
 
 .fa-eraser{
   color: #1AE2B2;
-  padding: 30% 20% 20% 30%;
+  padding: 50% 20% 20% 30%;
   grid-row: 3;
-}
-
-.fa-eraser:hover {
-  color: white;
 }
 
 p {
@@ -58,10 +50,8 @@ p {
 
 #stroke-thick {
   color: #1AE2B2;
-  padding: 20%;
+  padding: 20% 30% 30% 20%;
 }
-
-
 
 /*Stage*/
 #stage {
@@ -77,7 +67,7 @@ p {
 /*LayerPanel*/
 #layerPanel {
   display: grid;
-  grid-template-rows: 6% 20% 30%;
+  grid-template-rows: 6% 15% 30%;
   background-color: #33424C;
 }
 
@@ -87,6 +77,7 @@ p {
   grid-row: 2;
 }
 
+
 ul {
   list-style: none;
   color: #1AE2B2;
@@ -95,6 +86,7 @@ ul {
 #layerHeader {
   color: white;
   font-size: 25px;
+  margin-bottom: 5%;
 }
 
 .fa-layer-group {
@@ -106,5 +98,15 @@ ul {
 .fa-eye {
   margin-left: 8%;
   margin-right: 8%;
-  margin-top: 15%;
+  margin-top: 3%;
 }
+.fa-paint-brush:hover,.fa-eraser:hover,#stroke-thin:hover,#stroke-regular:hover,
+#stroke-thick:hover,.fa-undo:hover,.fa-eye:hover, ul
+{
+  color: white;
+}
+
+.icon:hover {
+  background-color: #1AE2B2;
+}
+

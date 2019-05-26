@@ -2,9 +2,17 @@
 
 import '@/css/style.css';
 import { library, dom } from '@fortawesome/fontawesome-svg-core';
-import { faCoffee } from '@fortawesome/free-solid-svg-icons';
+import { faPaintBrush } from '@fortawesome/free-solid-svg-icons';
+import { faEraser }     from '@fortawesome/free-solid-svg-icons';
+import { faCircle }     from '@fortawesome/free-solid-svg-icons';
 
-library.add( faCoffee );
+
+import { faUndo }       from '@fortawesome/free-solid-svg-icons';
+import { faLayerGroup } from '@fortawesome/free-solid-svg-icons';
+import { faEye}        from '@fortawesome/free-solid-svg-icons';
+
+
+library.add( faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye);
 dom.i2svg();
 
 /*

@@ -1,19 +1,69 @@
 *{
   margin: 0;
   padding: 0;
+  font-family: 'Noto Sans HK', sans-serif;
 }
 
 #app {
   height: 100vh;
   display: grid;
-  grid-template-columns: auto 65px 200px;
+  grid-template-columns: 70px auto 200px;
   overflow: hidden;
 }
 
+/*ToolBar*/
 #toolBar {
-  background-color: red;
+  display: grid;
+  grid-template-rows: 10% 10% 10% 5% 5% 5% 5%;
+  background-color: #33424C;
+  overflow: hidden;
 }
 
+.fa-paint-brush{
+  color: #1AE2B2;
+  padding: 30% 20% 20% 30%;
+  grid-row: 2;
+}
+
+.fa-paint-brush:hover {
+  color: white;
+}
+
+.fa-eraser{
+  color: #1AE2B2;
+  padding: 30% 20% 20% 30%;
+  grid-row: 3;
+}
+
+.fa-eraser:hover {
+  color: white;
+}
+
+p {
+  color: white;
+  font-size: 25px;
+  padding: 10%;
+  grid-row: 3;
+}
+
+#stroke-thin {
+  color: #1AE2B2;
+  padding: 20% 40%;
+}
+
+#stroke-regular {
+  color: #1AE2B2;
+  padding: 20% 30%;
+}
+
+#stroke-thick {
+  color: #1AE2B2;
+  padding: 20%;
+}
+
+
+
+/*Stage*/
 #stage {
   background-color: yellow;
 }
@@ -21,9 +71,40 @@
 .layer {
   width: 100%;
   height: 100%;
-  background-color: pink;
+  background-color: white;
 }
 
+/*LayerPanel*/
 #layerPanel {
-  background-color: greenyellow;
+  display: grid;
+  grid-template-rows: 6% 20% 30%;
+  background-color: #33424C;
+}
+
+.fa-undo {
+  color: #1AE2B2;
+  padding: 30% 40% 10% 40%;
+  grid-row: 2;
+}
+
+ul {
+  list-style: none;
+  color: #1AE2B2;
+}
+
+#layerHeader {
+  color: white;
+  font-size: 25px;
+}
+
+.fa-layer-group {
+  margin-left: 8%;
+  margin-right: 8%;
+  margin-top: 15%;
+}
+
+.fa-eye {
+  margin-left: 8%;
+  margin-right: 8%;
+  margin-top: 15%;
 }

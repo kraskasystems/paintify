@@ -14,43 +14,48 @@
 /*ToolBar*/
 #toolBar {
   display: grid;
-  grid-template-rows: 10% 10% 10% 5% 5% 5% 5% 7%;
+  grid-template-rows: 10% 10% 10% 10% 5% 5% 10% 10% 10% 10%;
   background-color: #33424c;
   overflow: hidden;
 }
 
 .fa-paint-brush {
   color: #1ae2b2;
-  padding: 50% 20% 20% 30%;
   grid-row: 2;
+  padding-top: 33%;
+  padding-left: 25%;
 }
 
 .fa-eraser {
   color: #1ae2b2;
-  padding: 50% 20% 20% 30%;
   grid-row: 3;
+  padding-top: 33%;
+  padding-left: 25%;
 }
 
 p {
   color: white;
   font-size: 25px;
-  padding: 10%;
-  grid-row: 3;
+  grid-row: 5;
+  margin-left: 10%;
 }
 
 #stroke-thin {
   color: #1ae2b2;
-  padding: 20% 40%;
+  padding-top: 10%;
+  padding-left: 40%;
 }
 
 #stroke-regular {
   color: #1ae2b2;
-  padding: 20% 30%;
+  padding-top: 33%;
+  padding-left: 28%;
 }
 
 #stroke-thick {
   color: #1ae2b2;
-  padding: 20% 30% 30% 20%;
+  padding-top: 25%;
+  padding-left: 15%;
 }
 
 /*Stage*/
@@ -67,14 +72,15 @@ p {
 /*LayerPanel*/
 #layerPanel {
   display: grid;
-  grid-template-rows: 6% 15% 30%;
+  grid-template-rows: 10% 10% 30% 30%;
   background-color: #33424c;
 }
 
 .fa-undo {
   color: #1ae2b2;
-  padding: 30% 40% 10% 40%;
   grid-row: 2;
+  padding-top: 15%;
+  padding-left: 40%;
 }
 
 .colors {
@@ -104,8 +110,7 @@ ul {
 .fa-eye {
   margin-left: 8%;
   margin-right: 8%;
-  margin-top: 3%;
-  color: #1ae2b2;
+  color: white;
 }
 
 .fa-paint-brush:hover,
@@ -114,7 +119,6 @@ ul {
 #stroke-regular:hover,
 #stroke-thick:hover,
 .fa-undo:hover,
-.fa-eye:hover,
 ul {
   color: white;
 }

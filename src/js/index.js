@@ -1,9 +1,12 @@
 import '@/css/style.css';
 import { library, dom } from '@fortawesome/fontawesome-svg-core';
-import { faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faPaintBrush, faEraser, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faSquare } from '@fortawesome/free-regular-svg-icons';
+import { getRandomInt } from '../util/randomInt';
+
 import config from '../config/paintify.config';
 
-library.add( faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle);
+library.add( faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle, faSquare, faCircle);
 dom.i2svg();
 
 /*
@@ -18,15 +21,29 @@ dom.i2svg();
 */
 
 // create a canvas Element
-const createCanvas = function (pStage){
+const createCanvas = function (pStage, pId){
   let elem = document.createElement('canvas');
 
   elem.setAttribute('class', 'layer');
-  elem.setAttribute('id', 'canvas');
+  elem.setAttribute('id', pId);
   elem.setAttribute('width', pStage.clientWidth );
   elem.setAttribute('height', pStage.clientHeight );
 
+  pStage.appendChild(elem);
+
   return elem;
+};
+
+const thicknessElem = document.getElementById('strokeHelper');
+
+const drawStrokeThickness = (pElem, pEvent) => {
+
+  let width = brushSize;
+  let height = brushSize;
+  let top = pEvent.clientY - brushSize / 2;
+  let left = pEvent.clientX - 70 - brushSize / 2;
+
+  pElem.setAttribute('style', `width: ${width}px; height: ${height}px; top: ${top}px; left: ${left}px`);
 };
 
 // ********* POSITIONING ********* //
@@ -75,10 +92,12 @@ const changeBrushSize = (event) => {
   if(event.deltaY > 0 && brushSize > 1){
     brushSize--;
   }
+
+  drawStrokeThickness(thicknessElem, event);
 };
 
 // ********* TOOLING ******** //
-let currentTool = 'draw';
+let activeTool = 'draw';
 
 // ********* CLEAR LAYER ********* //
 let activeLayer = null;
@@ -86,6 +105,28 @@ const clearLayer = (pLayer, pContext) => {
   pContext.clearRect(0,0, pLayer.width, pLayer.height);
 };
 
+// ******** COLOR BOMB ********** //
+const colorBomb = (pLayer) => {
+  activeTool = 'bomb';
+
+  const ctx = pLayer.getContext('2d');
+
+  for(let i = 0; i < 1000; i++){
+    let randomColorHex = colorSet[getRandomInt(0, colorSet.length-1)].hexValue;
+    let randomX = getRandomInt(70, pLayer.clientWidth);
+    let randomY = getRandomInt(0, pLayer.clientHeight);
+    let randomRad = getRandomInt(0,200);
+
+    ctx.beginPath();
+    ctx.fillStyle = randomColorHex;
+    ctx.arc(randomX, randomY, randomRad, 0, Math.PI * 2, true);
+    ctx.stroke();
+  }
+};
+
+///////////////////////////////////////////////////////
+// INIT ///////////////////////////////////
+//////////////////////////////////////////////////////
 const init = function (){
 
   // ******** STAGE ********* //
@@ -94,12 +135,9 @@ const init = function (){
 
   // ******** CANVAS ********* //
   // create a new canvas element and add it to the stage
-  const canvas = createCanvas(stage);
+  const canvas = createCanvas(stage, 'canvas');
   // get canvas context
   const ctx = canvas.getContext('2d');
-
-  // append canvas layer to stage
-  stage.appendChild(canvas);
 
   activeLayer = canvas;
 
@@ -113,7 +151,7 @@ const init = function (){
       ctx.lineCap = 'round';
       ctx.strokeStyle = color;
 
-      if(currentTool === 'eraser'){
+      if(activeTool === 'eraser'){
         ctx.globalCompositeOperation = 'destination-out';
       } else {
         ctx.globalCompositeOperation = 'source-over';
@@ -121,10 +159,11 @@ const init = function (){
 
       ctx.moveTo(position.x, position.y);
       setPosition(event);
-      console.log(position);
       ctx.lineTo(position.x, position.y);
       ctx.stroke();
     }
+
+    drawStrokeThickness(thicknessElem, event);
   };
 
   // add eventlisteners for drawing
@@ -135,7 +174,7 @@ const init = function (){
 
   const toolEraser = document.getElementById('toolEraser');
 
-  toolEraser.addEventListener('click', () => {currentTool = 'eraser';});
+  toolEraser.addEventListener('click', () => {activeTool = 'eraser';});
 
   const toolReset = document.getElementById('toolReset');
 
@@ -143,7 +182,19 @@ const init = function (){
 
   const toolBrush = document.getElementById('toolBrush');
 
-  toolBrush.addEventListener('click', () => (currentTool = 'brush'));
+  toolBrush.addEventListener('click', () => {activeTool = 'brush';});
+
+  const toolCircle = document.getElementById('toolCircle');
+
+  toolCircle.addEventListener('click', () => {activeTool = 'circle';});
+
+  const toolRectangle = document.getElementById('toolRectangle');
+
+  toolRectangle.addEventListener('click', () => {activeTool = 'rectangle';});
+
+  const toolBomb = document.getElementById('toolBomb');
+
+  toolBomb.addEventListener('click', () => { colorBomb(canvas); });
 
   setConfiguredColors(colorSet, colorPalette);
 };

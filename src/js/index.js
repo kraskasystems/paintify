@@ -1,9 +1,9 @@
 import '@/css/style.css';
 import { library, dom } from '@fortawesome/fontawesome-svg-core';
-import { faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import config from '../config/paintify.config';
 
-library.add( faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash);
+library.add( faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle);
 dom.i2svg();
 
 /*
@@ -58,9 +58,7 @@ const setConfiguredColors = (pColors, pPalette) => {
     elem.setAttribute('style', `background-color: #${color.hexValue}`);
 
     elem.addEventListener('click', (event) => {
-      const paletteKey = document.getElementById(event.target.id).getAttribute('data-key');
-
-      activeColor = paletteKey;
+      activeColor = document.getElementById(event.target.id).getAttribute('data-key');
     });
 
     pPalette.appendChild(elem);

@@ -7,11 +7,11 @@
 #app {
   height: 100vh;
   display: grid;
-  grid-template-columns: 70px auto 200px;
+  grid-template-columns: 70px auto 250px;
   overflow: hidden;
 }
 
-#layerPanel, #toolBar {
+#sideBar, #toolBar {
   background-color: #33424c;
 }
 
@@ -23,49 +23,86 @@
   width: 100%;
   padding: 25px 0;
   text-align: center;
-  color: #1ae2b2;
+  color: #fff;
 }
 
-.tool-icon:hover {
+.tool-icon:hover, .tool-icon.active {
   color: white;
   background-color: #1ae2b2;
 }
 
-#layerPanel {
-  display: grid;
-  grid-template-rows: 10% 10% 30% 30%;
+#sideBar {
+  display: flex;
+  flex-direction: column;
 }
 
-.colors {
-  color: white;
-  font-size: 25px;
-  padding-left: 20%;
-  padding-top: 10%;
+.panel {
+  padding: 15px;
 }
 
-ul {
-  list-style: none;
-  color: white;
+.panel-title
+{
+  color: #fff;
 }
 
-#layerHeader {
-  color: white;
-  font-size: 25px;
-  margin-bottom: 5%;
+.panel-action {
+  float: right;
 }
 
 #colorPalette {
   display: grid;
-  grid-template-columns: 20% 20% 20% 20% 20%;
-  height: 40px;
-  margin: 25px 0;
+  grid-template-columns: 20% 20% 20% 20% 20% ;
+  height: 50px;
+  margin-top: 25px;
 }
 
-#colorElement {
+.colorElement {
   width: 100%;
   height: 50px;
 }
 
-#colorElement:hover {
+.colorElement:hover {
   cursor: pointer;
 }
+
+#layers {
+  display: flex;
+  flex-direction: column;
+  padding-top: 15px;
+}
+
+.layer-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: 2px;
+  color: #fff;
+  border: 1px solid transparent;
+  background-color: #3d4e59;
+}
+
+.layer-item:hover {
+  border: 1px solid #1d222b;
+}
+
+.layer-item .layer-title{
+  font-size: 12px;
+  flex: 1;
+}
+
+.layer-item .layer-actions {
+  flex: 1;
+  text-align: right;
+}
+
+.layer-action {
+  padding: 0 5px;
+  cursor: pointer;
+}
+
+.layer-action:hover {
+  color: #1ae2b2;
+}
+

@@ -20,6 +20,7 @@
   "license": "ISC",
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.18",
+    "@fortawesome/free-regular-svg-icons": "^5.9.0",
     "@fortawesome/free-solid-svg-icons": "^5.8.2",
     "clean-webpack-plugin": "^2.0.2",
     "css-loader": "^2.1.1",

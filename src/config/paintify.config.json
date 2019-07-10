@@ -1,0 +1,9 @@
+{
+  "colorSet": [
+    { "name": "orange", "hexValue": "FF8A47" },
+    { "name": "coral", "hexValue": "FC6170"},
+    { "name": "sea", "hexValue": "8CEEEE"},
+    { "name": "turquise", "hexValue": "26BFBF"},
+    { "name": "yellow", "hexValue": "FFD747"}
+  ]
+}

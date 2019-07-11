@@ -5,5 +5,17 @@
     { "name": "sea", "hexValue": "8CEEEE"},
     { "name": "turquise", "hexValue": "26BFBF"},
     { "name": "yellow", "hexValue": "FFD747"}
-  ]
+  ],
+
+  "dom": {
+    "tools": {
+      "brush": "toolBrush",
+      "eraser": "toolEraser",
+      "reset": "toolReset",
+      "addLayer": "addLayerBtn"
+    },
+    "stage": "stage",
+    "layerStack": "layers",
+    "colorPalette": "colorPalette"
+  }
 }

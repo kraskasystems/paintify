@@ -8,14 +8,17 @@
   ],
 
   "dom": {
-    "tools": {
-      "brush": "toolBrush",
-      "eraser": "toolEraser",
-      "reset": "toolReset",
-      "addLayer": "addLayerBtn"
-    },
+    "brush": "toolBrush",
+    "eraser": "toolEraser",
+    "reset": "toolReset",
+    "addLayer": "addLayerBtn",
     "stage": "stage",
-    "layerStack": "layers",
-    "colorPalette": "colorPalette"
+    "layerSystemWrapper": "layers",
+    "colorPalette": "colorPalette",
+    "menuToggle": "menuToggle",
+    "menuClose": "menuClose",
+    "saveProject": "saveProject",
+    "downloadImage": "downloadImage",
+    "downloadActiveLayer": "downloadActiveLayer"
   }
 }

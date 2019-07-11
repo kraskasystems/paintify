@@ -29,7 +29,7 @@
   left: 0;
 }
 
-.layer.hidden {
+.hidden {
   display: none;
 }
 
@@ -58,6 +58,11 @@
   flex-direction: column;
 }
 
+#sideBar hr {
+  opacity: .3;
+  margin: 10px 0;
+}
+
 .panel {
   padding: 15px;
 }
@@ -65,6 +70,7 @@
 .panel-title
 {
   color: #fff;
+  font-size: 18px;
 }
 
 .panel-action {
@@ -105,6 +111,10 @@
   background-color: #3d4e59;
 }
 
+.layer-invisible{
+  color: #FC6170;
+}
+
 .layer-control:hover, .layer-control.active {
   border: 1px solid #1d222b;
 }
@@ -128,3 +138,63 @@
   color: #1ae2b2;
 }
 
+.btn {
+  background-color: #3d4e59;
+  border: 0;
+  padding: 10px 15px;
+  text-align: left;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #1ae2b2;
+  color: #3d4e59;
+}
+
+.btn:visited, .btn:active, .btn:focus {
+  border: 0 transparent;
+}
+
+#actionsModal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(26,226,176, .5);
+  z-index: 15;
+}
+
+#modalContainer {
+  width: 400px;
+  background-color: white;
+}
+
+#modalHead {
+  padding: 15px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #3d4e59;
+  color: #fff;
+}
+
+#menuClose {
+  cursor: pointer;
+}
+
+#modalBody {
+  padding: 15px;
+}
+
+.closed {
+  display: none !important;
+}

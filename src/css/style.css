@@ -29,6 +29,10 @@
   left: 0;
 }
 
+.layer.hidden {
+  display: none;
+}
+
 #sideBar, #toolBar {
   background-color: #33424c;
 }
@@ -89,7 +93,7 @@
   padding-top: 15px;
 }
 
-.layer-item {
+.layer-control {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -101,16 +105,16 @@
   background-color: #3d4e59;
 }
 
-.layer-item:hover {
+.layer-control:hover, .layer-control.active {
   border: 1px solid #1d222b;
 }
 
-.layer-item .layer-title{
+.layer-control .layer-title{
   font-size: 12px;
   flex: 1;
 }
 
-.layer-item .layer-actions {
+.layer-control .layer-actions {
   flex: 1;
   text-align: right;
 }

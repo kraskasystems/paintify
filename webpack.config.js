@@ -1,6 +1,5 @@
 const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   entry: './src/js/index.js',
@@ -28,6 +27,10 @@ module.exports = {
       {
         test: /\.(svg|woff|woff2|eot|ttf)$/,
         use: 'file-loader'
+      },
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: 'file-loader'
       }
     ]
   },
@@ -39,7 +42,6 @@ module.exports = {
   },
 
   plugins: [
-    new CleanWebpackPlugin(),
     new HTMLWebpackPlugin({
       inject: 'body',
       template: 'src/static/index.html',

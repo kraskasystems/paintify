@@ -47,6 +47,7 @@ class LayerStack {
 
     let layerHideAction = document.createElement('span');
 
+    layerHideAction.setAttribute('id', `layerControlHide${this.layerIdCount}`);
     layerHideAction.addEventListener('click', () => { this.hideLayer(id);});
 
     let layerHideIcon = document.createElement('i');
@@ -76,17 +77,22 @@ class LayerStack {
     layerElem.appendChild(layerTitle);
     layerElem.appendChild(layerActions);
 
-    controlWrapper.appendChild(layerElem);
+    controlWrapper.prepend(layerElem);
     this.layerControls.push(layerElem);
 
     this.selectLayer(id);
 
     this.layerIdCount++;
+
+    return elem;
   }
 
   hideLayer(pId) {
     let layer = this.getLayer(pId);
 
+    let layerControl = document.getElementById('layerControlHide'+ pId.substr(5));
+
+    layerControl.classList.toggle('layer-invisible');
     layer.classList.toggle('hidden');
   }
 
@@ -106,8 +112,7 @@ class LayerStack {
     layerControl.remove();
 
     // set first layer as active layer
-    this.propagateActive(this.layers[0]);
-
+    this.selectLayer(this.layers[this.layers.length-1].id);
   }
 
   getLayer(pId){

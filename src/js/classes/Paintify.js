@@ -1,32 +1,53 @@
 import { Brush } from './Brush';
 import { LayerStack } from './LayerStack';
+import { save, load } from '../util/fakeServer';
 
 class Paintify {
-  constructor({config: pConfig, domElements: pDomElements}){
+  constructor({ config: pConfig }){
     this.config = pConfig;
     this.drawPosition = {x: 0, y: 0};
     this.activeTool = '';
     this.activeColor = '';
     this.activeLayer = '';
+    this.actionsModal = false;
     this.domControls = {};
 
     this.activateLayer = this.activateLayer.bind(this);
-
-    this.initTools(pDomElements, pConfig);
+    this.initApp();
   }
 
-  initTools(dom, config){
+  initApp(){
+    const config = this.config;
+    const domElements = {};
+
+    // set configured dom elements
+    Object.keys(config.dom).forEach((key) => {
+      domElements[key] = document.getElementById(config.dom[key]);
+    });
+
     // initialize brush
-    this.initBrush(dom);
+    this.initBrush(domElements);
 
     // initialize eraser
-    this.initEraser(dom);
+    this.initEraser(domElements);
+
+    // initialize further buttons
+    domElements.reset.addEventListener('click', () => { this.clearLayer(); });
+    domElements.addLayer.addEventListener('click', () => { this.addLayer(); });
+    domElements.menuToggle.addEventListener('click', () => { this.toggleMenu(); });
+    domElements.menuClose.addEventListener('click', () => { this.toggleMenu(); });
+    domElements.saveProject.addEventListener('click', () => { this.saveProject(); });
+    domElements.downloadImage.addEventListener('click', () => { this.downloadMergedImage();});
+    domElements.downloadActiveLayer.addEventListener('click', () => {this.downloadLayerImage();});
 
     // initialize color palette
-    this.initColorPalette(config, dom);
+    this.initColorPalette(config, domElements);
 
     // initialize layer stack
-    this.initLayerStack(dom.stage, dom.layerSystemWrapper);
+    this.initLayerStack(domElements.stage, domElements.layerSystemWrapper);
+
+    // init windowListeners
+    this.initWindowListeners();
   }
 
   initBrush(dom){
@@ -110,30 +131,32 @@ class Paintify {
   }
 
   draw(event){
-    const ctx = this.activeLayer.getContext('2d');
+    if(!this.actionsModal){
+      const ctx = this.activeLayer.getContext('2d');
 
-    if(event.buttons === 1){
-      let color = `#${this.activeColor}`;
+      if(event.buttons === 1){
+        let color = `#${this.activeColor}`;
 
-      ctx.beginPath();
+        ctx.beginPath();
 
-      switch(this.activeTool){
-      case 'eraser':
-        ctx.lineWidth = this.eraser.size;
-        ctx.globalCompositeOperation = 'destination-out';
-        break;
-      case 'brush':
-        ctx.lineWidth = this.brush.size;
-        ctx.globalCompositeOperation = 'source-over';
-        break;
+        switch(this.activeTool){
+        case 'eraser':
+          ctx.lineWidth = this.eraser.size;
+          ctx.globalCompositeOperation = 'destination-out';
+          break;
+        case 'brush':
+          ctx.lineWidth = this.brush.size;
+          ctx.globalCompositeOperation = 'source-over';
+          break;
+        }
+
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = color;
+        ctx.moveTo(this.drawPosition.x, this.drawPosition.y);
+        this.setDrawPosition(event);
+        ctx.lineTo(this.drawPosition.x, this.drawPosition.y);
+        ctx.stroke();
       }
-
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = color;
-      ctx.moveTo(this.drawPosition.x, this.drawPosition.y);
-      this.setDrawPosition(event);
-      ctx.lineTo(this.drawPosition.x, this.drawPosition.y);
-      ctx.stroke();
     }
   }
 
@@ -145,24 +168,90 @@ class Paintify {
       tool = this.eraser;
     }
 
-    console.log(tool.size);
     tool.changeBrushSize(event);
   }
 
   drawStrokeThickness(event){
-    const thicknessElem = document.getElementById('strokeHelper');
-    const activeTool = this.activeTool;
-    let tool = this.brush;
 
-    if(activeTool === 'eraser'){
-      tool = this.eraser;
+    if(!this.actionsModal){
+      const thicknessElem = document.getElementById('strokeHelper');
+      const activeTool = this.activeTool;
+      let tool = this.brush;
+
+      if(activeTool === 'eraser'){
+        tool = this.eraser;
+      }
+      let width = tool.size;
+      let height = tool.size;
+      let top = event.clientY - tool.size / 2;
+      let left = event.clientX - 70 - tool.size / 2;
+
+      thicknessElem.setAttribute('style', `width: ${width}px; height: ${height}px; top: ${top}px; left: ${left}px`);
     }
-    let width = tool.size;
-    let height = tool.size;
-    let top = event.clientY - tool.size / 2;
-    let left = event.clientX - 70 - tool.size / 2;
+  }
 
-    thicknessElem.setAttribute('style', `width: ${width}px; height: ${height}px; top: ${top}px; left: ${left}px`);
+  saveProject(){
+    const canvas = this.activeLayer;
+
+    save(canvas.toDataURL('image/png'), () => {alert('saved'); });
+  }
+
+  loadProject(){
+    load();
+  }
+
+  downloadMergedImage(){
+    // create new canvas element to merge all layers
+    const merged = this.layerStack.createCanvas();
+    const layers = this.layerStack.layers;
+    const ctx = merged.getContext('2d');
+
+    layers.forEach((layer) => {
+      ctx.drawImage(layer, 0,0);
+    });
+
+    this.downloadLayerImage();
+
+    this.layerStack.deleteLayer(merged.id);
+  }
+
+  downloadLayerImage(){
+    const image = this.activeLayer.toDataURL('image/png');
+    const tmpLink = document.createElement('a');
+
+    tmpLink.download = 'paintify.png';
+    tmpLink.href = image;
+
+    document.body.appendChild(tmpLink);
+    tmpLink.click();
+    document.body.removeChild(tmpLink);
+  }
+
+  toggleMenu() {
+    if(this.actionsModal){
+      this.actionsModal = false;
+      document.getElementById('actionsModal').classList.add('closed');
+    } else {
+      this.actionsModal = true;
+      document.getElementById('actionsModal').classList.remove('closed');
+    }
+  }
+
+  initWindowListeners(){
+    window.addEventListener('mousemove', (e) => {
+      this.draw(e);
+      this.drawStrokeThickness(e);
+    });
+    window.addEventListener('mousedown', (e) => {
+      this.setDrawPosition(e);
+    });
+    window.addEventListener('mouseenter', (e) => {
+      this.setDrawPosition(e);
+    });
+    window.addEventListener('wheel', (e) => {
+      this.setBrushSize(e);
+      this.drawStrokeThickness(e);
+    });
   }
 }
 

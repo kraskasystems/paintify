@@ -1,42 +1,43 @@
+// css
 import '../css/style.css';
-import { library, dom } from '@fortawesome/fontawesome-svg-core';
-import { faPaintBrush, faEraser, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
-import { faCircle, faSquare } from '@fortawesome/free-regular-svg-icons';
-import { Paintify } from '../js/classes/Paintify';
 
+// font-awesome icon import
+import { faPaintBrush, faEraser, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle, faPencilAlt, faFile, faDownload, faUpload, faTimes, faBars } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faSquare, faSave} from '@fortawesome/free-regular-svg-icons';
+import { library, dom } from '@fortawesome/fontawesome-svg-core';
+import { wait } from './util/wait';
+
+// Paintify resources
+import { Paintify } from '../js/classes/Paintify';
 import appConfig from '../config/paintify.config';
 
-library.add( faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash, faTint, faBomb, faPlusCircle, faSquare, faCircle, faPencilAlt);
+// font-awesome icon library
+library.add(
+  faPaintBrush, faEraser, faCircle, faUndo, faLayerGroup, faEye, faTrash, faTint,
+  faBomb, faPlusCircle, faSquare, faCircle, faPencilAlt, faFile, faDownload, faUpload,
+  faSave, faTimes, faBars);
 
+// font-awesome tools
 dom.i2svg();
 dom.watch();
 
-// Brush
-const brushBtn = document.getElementById('toolBrush');
-// Eraser
-const eraserBtn = document.getElementById('toolEraser');
-// color palette
-const paletteContainer = document.getElementById('colorPalette');
-// layer stack
-const stage = document.getElementById('stage');
-// clear button
-const resetBtn = document.getElementById('toolReset');
-// add layer btn
-const addLayerBtn = document.getElementById('addLayerBtn');
-// layer wrapper
-const layerSystemWrapper = document.getElementById('layers');
+// init function
+const init = async function(){
+  // get spashscreen dom element
+  const splashScreen = document.getElementById('splashScreen');
 
-// Paintify instance
-const paintify = new Paintify({config: appConfig, domElements: {brush: brushBtn, eraser: eraserBtn, colorPalette: paletteContainer, stage: stage, layerSystemWrapper: layerSystemWrapper}});
+  // initialize paintify - hidden behind splash screen
+  new Paintify({config: appConfig});
 
-const init = function () {
-  resetBtn.addEventListener('click', () => { paintify.clearLayer(); } );
-  addLayerBtn.addEventListener('click', () => { paintify.addLayer(); } );
-  window.addEventListener('mousemove', (e) => { paintify.draw(e); paintify.drawStrokeThickness(e); });
-  window.addEventListener('mousedown', (e) => { paintify.setDrawPosition(e); });
-  window.addEventListener('mouseenter', (e) => { paintify.setDrawPosition(e);});
-  window.addEventListener('wheel', (e) => { paintify.setBrushSize(e); paintify.drawStrokeThickness(e);});
-  console.log(paintify);
+  // fade out splash screen after 2 s
+  await wait(2000);
+  splashScreen.classList.remove('visible');
+  splashScreen.classList.add('invisible');
+
+  // remove splash screen after transition
+  await wait(1000);
+  splashScreen.remove();
+
 };
 
 window.addEventListener('load', init);

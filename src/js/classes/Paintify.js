@@ -1,15 +1,19 @@
 import { Brush } from './Brush';
 import { LayerStack } from './LayerStack';
 import { save, load } from '../util/fakeServer';
+import { calculateDistance } from '../util/calculateDistance';
+import { getRandomInt } from '../util/randomInt';
 
 class Paintify {
   constructor({ config: pConfig }){
     this.config = pConfig;
     this.drawPosition = {x: 0, y: 0};
+    this.distanceFrom = {x: 0, y: 0};
     this.activeTool = '';
     this.activeColor = '';
     this.activeLayer = '';
     this.actionsModal = false;
+    this.domElements = {};
     this.domControls = {};
 
     this.activateLayer = this.activateLayer.bind(this);
@@ -18,7 +22,7 @@ class Paintify {
 
   initApp(){
     const config = this.config;
-    const domElements = {};
+    const domElements = this.domElements;
 
     // set configured dom elements
     Object.keys(config.dom).forEach((key) => {
@@ -31,14 +35,14 @@ class Paintify {
     // initialize eraser
     this.initEraser(domElements);
 
-    // initialize further buttons
-    domElements.reset.addEventListener('click', () => { this.clearLayer(); });
-    domElements.addLayer.addEventListener('click', () => { this.addLayer(); });
-    domElements.menuToggle.addEventListener('click', () => { this.toggleMenu(); });
-    domElements.menuClose.addEventListener('click', () => { this.toggleMenu(); });
-    domElements.saveProject.addEventListener('click', () => { this.saveProject(); });
-    domElements.downloadImage.addEventListener('click', () => { this.downloadMergedImage();});
-    domElements.downloadActiveLayer.addEventListener('click', () => {this.downloadLayerImage();});
+    // initialize circle tool
+    this.initCircleTool(domElements);
+
+    // initialize rectangle tool
+    this.initRectTool(domElements);
+
+    // initialize color bomb
+    this.initColorBomb(domElements);
 
     // initialize color palette
     this.initColorPalette(config, domElements);
@@ -48,6 +52,16 @@ class Paintify {
 
     // init windowListeners
     this.initWindowListeners();
+
+    // initialize further buttons
+    domElements.reset.addEventListener('click', () => { this.layerStack.reset(); this.layerStack.createCanvas(); });
+    domElements.addLayer.addEventListener('click', () => { this.addLayer(); });
+    domElements.menuToggle.addEventListener('click', () => { this.toggleMenu(); });
+    domElements.menuClose.addEventListener('click', () => { this.toggleMenu(); });
+    domElements.saveProject.addEventListener('click', () => { this.saveProject(); });
+    domElements.loadProject.addEventListener('click', () => { this.loadProject(); });
+    domElements.downloadImage.addEventListener('click', () => { this.downloadMergedImage();});
+    domElements.downloadActiveLayer.addEventListener('click', () => {this.downloadLayerImage();});
   }
 
   initBrush(dom){
@@ -55,7 +69,7 @@ class Paintify {
     this.brush = new Brush(dom.brush);
     this.brush.element.addEventListener('click', () => {
       this.activeTool = 'brush';
-      this.setActiveClass('brush');
+      this.setActiveToolClass('brush');
     });
     this.domControls['brush'] = this.brush.element;
     this.activeTool = 'brush';
@@ -67,8 +81,35 @@ class Paintify {
     this.domControls['eraser'] = this.eraser.element;
     this.eraser.element.addEventListener('click', () => {
       this.activeTool = 'eraser';
-      this.setActiveClass('eraser');
+      this.setActiveToolClass('eraser');
     });
+  }
+
+  initCircleTool(dom){
+    dom.circle.addEventListener('click', () => {
+      this.activeTool = 'circle';
+      this.setActiveToolClass('circle');
+    });
+
+    this.domControls['circle'] = dom.circle;
+  }
+
+  initRectTool(dom){
+    dom.rectangle.addEventListener('click', () => {
+      this.activeTool = 'rectangle';
+      this.setActiveToolClass('rectangle');
+    });
+
+    this.domControls['rectangle'] = dom.rectangle;
+  }
+
+  initColorBomb(dom){
+    dom.colorBomb.addEventListener('click', () => {
+      this.activeTool = 'bomb';
+      this.setActiveToolClass('bomb');
+    });
+
+    this.domControls['bomb'] = dom.colorBomb;
   }
 
   initColorPalette(config, controls){
@@ -85,12 +126,13 @@ class Paintify {
 
       elem.addEventListener('click', (event) => {
         this.activeColor = document.getElementById(event.target.id).getAttribute('data-value');
-        console.log(this.activeColor);
       });
 
       controls.colorPalette.appendChild(elem);
       i++;
     });
+
+    this.activeColor = config.colorSet[0].hexValue;
   }
 
   initLayerStack(stage, layerWrapper){
@@ -98,22 +140,33 @@ class Paintify {
     this.activeLayer = this.layerStack.layers[0];
   }
 
-  addLayer(){
-    this.layerStack.createCanvas();
+  initWindowListeners(){
+    this.domElements.stage.addEventListener('mousemove', (e) => {
+      this.draw(e);
+      this.drawStrokeThickness(e);
+    });
+    this.domElements.stage.addEventListener('mousedown', (e) => {
+      this.setDrawPosition(e);
+      this.setMeasurePosition(e);
+    });
+    this.domElements.stage.addEventListener('mouseenter', (e) => {
+      this.setDrawPosition(e);
+    });
+    this.domElements.stage.addEventListener('wheel', (e) => {
+      this.setBrushSize(e);
+      this.drawStrokeThickness(e);
+    });
   }
 
-  clearLayer(){
-    const layer = this.activeLayer;
-    const context = layer.getContext('2d');
-
-    context.clearRect(0,0, layer.width, layer.height);
+  addLayer(){
+    this.layerStack.createCanvas();
   }
 
   activateLayer(pLayer){
     this.activeLayer = pLayer;
   }
 
-  setActiveClass(pTool){
+  setActiveToolClass(pTool){
     const tools = this.domControls;
 
     Object.keys(tools).forEach((key) => {
@@ -126,37 +179,115 @@ class Paintify {
   }
 
   setDrawPosition(event){
-    this.drawPosition.x = event.clientX - 65;
+    this.drawPosition.x = event.clientX - 70;
     this.drawPosition.y = event.clientY;
+  }
+
+  setMeasurePosition(event){
+    this.distanceFrom.x = event.clientX - 70;
+    this.distanceFrom.y = event.clientY;
   }
 
   draw(event){
     if(!this.actionsModal){
+      // get active layer context
       const ctx = this.activeLayer.getContext('2d');
 
+      // set active color as css hex value
+      let color = `#${this.activeColor}`;
+
       if(event.buttons === 1){
-        let color = `#${this.activeColor}`;
-
-        ctx.beginPath();
-
         switch(this.activeTool){
         case 'eraser':
-          ctx.lineWidth = this.eraser.size;
-          ctx.globalCompositeOperation = 'destination-out';
+          this.erase( event, ctx);
           break;
         case 'brush':
-          ctx.lineWidth = this.brush.size;
-          ctx.globalCompositeOperation = 'source-over';
+          this.drawBrushStroke( event, ctx, color);
+          break;
+        case 'circle':
+          this.setDrawPosition(event);
+          this.drawCircle(ctx, color);
+          break;
+        case 'rectangle':
+          this.setDrawPosition(event);
+          this.drawRectangle(ctx, color);
+          break;
+        case 'bomb':
+          this.setDrawPosition(event);
+          this.drawBomb(ctx);
           break;
         }
 
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = color;
-        ctx.moveTo(this.drawPosition.x, this.drawPosition.y);
-        this.setDrawPosition(event);
-        ctx.lineTo(this.drawPosition.x, this.drawPosition.y);
-        ctx.stroke();
       }
+    }
+  }
+
+  drawBrushStroke(event, ctx, color){
+    ctx.beginPath();
+    ctx.lineWidth = this.brush.size;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = color;
+    ctx.moveTo(this.drawPosition.x, this.drawPosition.y);
+    this.setDrawPosition(event);
+    ctx.lineTo(this.drawPosition.x, this.drawPosition.y);
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  erase(event, ctx){
+    ctx.beginPath();
+    ctx.lineWidth = this.eraser.size;
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineCap = 'round';
+    ctx.moveTo(this.drawPosition.x, this.drawPosition.y);
+    this.setDrawPosition(event);
+    ctx.lineTo(this.drawPosition.x, this.drawPosition.y);
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  drawCircle(ctx, color) {
+    let dist = calculateDistance(this.drawPosition, this.distanceFrom);
+
+    ctx.beginPath();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.arc(this.distanceFrom.x , this.distanceFrom.y , dist ,0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  drawRectangle(ctx, color) {
+    let xLen = Math.abs(this.distanceFrom.x - this.drawPosition.x);
+    let yLen = Math.abs(this.distanceFrom.y - this.drawPosition.y);
+
+    ctx.beginPath();
+    ctx.fillRect(this.distanceFrom.x , this.distanceFrom.y, xLen, yLen);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  drawBomb(ctx){
+    let colorSet = this.config.colorSet;
+    let color = 0;
+    let rad = 0;
+    let distX = 0;
+    let distY = 0;
+
+    for(let i = 0; i < 50; i++){
+      color = colorSet[getRandomInt(0, colorSet.length)].hexValue;
+      rad = getRandomInt(5, 25);
+      distX = getRandomInt(-250, 250);
+      distY = getRandomInt(-250,250);
+
+      ctx.beginPath();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.arc(this.drawPosition.x + distX, this.drawPosition.y + distY, rad ,0, Math.PI * 2);
+      ctx.fillStyle = `#${color}`;
+      ctx.fill();
+      ctx.closePath();
     }
   }
 
@@ -173,8 +304,11 @@ class Paintify {
 
   drawStrokeThickness(event){
 
-    if(!this.actionsModal){
-      const thicknessElem = document.getElementById('strokeHelper');
+    const thicknessElem = document.getElementById('strokeHelper');
+
+    if(!this.actionsModal && (this.activeTool === 'brush' || this.activeTool === 'eraser')){
+
+
       const activeTool = this.activeTool;
       let tool = this.brush;
 
@@ -187,17 +321,26 @@ class Paintify {
       let left = event.clientX - 70 - tool.size / 2;
 
       thicknessElem.setAttribute('style', `width: ${width}px; height: ${height}px; top: ${top}px; left: ${left}px`);
+    } else {
+      thicknessElem.setAttribute('style', 'width: 0px; height: 0px; top: -100px; left: -100px');
     }
   }
 
   saveProject(){
-    const canvas = this.activeLayer;
+    const layers = this.layerStack.layers;
+    const project = {};
 
-    save(canvas.toDataURL('image/png'), () => {alert('saved'); });
+    layers.forEach( layer => {
+      project[layer.id] = layer.toDataURL('image/png');
+    });
+
+    save(project, () => { alert('Project Saved');});
   }
 
   loadProject(){
-    load();
+    const project = (err, data) => {this.layerStack.restore(data);};
+
+    load(project);
   }
 
   downloadMergedImage(){
@@ -235,23 +378,6 @@ class Paintify {
       this.actionsModal = true;
       document.getElementById('actionsModal').classList.remove('closed');
     }
-  }
-
-  initWindowListeners(){
-    window.addEventListener('mousemove', (e) => {
-      this.draw(e);
-      this.drawStrokeThickness(e);
-    });
-    window.addEventListener('mousedown', (e) => {
-      this.setDrawPosition(e);
-    });
-    window.addEventListener('mouseenter', (e) => {
-      this.setDrawPosition(e);
-    });
-    window.addEventListener('wheel', (e) => {
-      this.setBrushSize(e);
-      this.drawStrokeThickness(e);
-    });
   }
 }
 

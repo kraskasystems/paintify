@@ -10,6 +10,9 @@
   "dom": {
     "brush": "toolBrush",
     "eraser": "toolEraser",
+    "circle": "toolCircle",
+    "rectangle": "toolRectangle",
+    "colorBomb": "toolBomb",
     "reset": "toolReset",
     "addLayer": "addLayerBtn",
     "stage": "stage",
@@ -18,6 +21,7 @@
     "menuToggle": "menuToggle",
     "menuClose": "menuClose",
     "saveProject": "saveProject",
+    "loadProject": "loadProject",
     "downloadImage": "downloadImage",
     "downloadActiveLayer": "downloadActiveLayer"
   }

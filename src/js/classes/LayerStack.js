@@ -137,6 +137,38 @@ class LayerStack {
     document.getElementById('layerControl' + numId).classList.add('active');
   }
 
+  reset(){
+    this.layers = [];
+    this.layerControls = [];
+    this.layerIdCount = 0;
+    this.controlWrapper.innerHTML = '';
+    let layers = document.querySelectorAll('.layer');
+
+    layers.forEach( el => el.remove());
+  }
+
+  restore(pProject){
+    this.reset();
+    const images = [];
+    const canvases = [];
+
+    Object.keys(pProject).forEach(key => {
+      let img = new Image;
+      let canvas = this.createCanvas();
+
+      img.src = pProject[key];
+      images.push(img);
+      canvases.push(canvas);
+    });
+
+    setTimeout(() => {
+      for(let i = 0; i < images.length; i++){
+        let ctx = canvases[i].getContext('2d');
+
+        ctx.drawImage(images[i],0,0);
+      }
+    }, 500);
+  }
 }
 
 export { LayerStack };

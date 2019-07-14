@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Paintify Source: classes/LayerStack.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cosmo.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Paintify</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Brush.html">Brush</a></li><li><a href="LayerStack.html">LayerStack</a></li><li><a href="Paintify.html">Paintify</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#calculateDistance">calculateDistance</a></li><li><a href="global.html#getRandomInt">getRandomInt</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#wait">wait</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: classes/LayerStack.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * @class LayerStack
+ * instantinates a layer stack for layered images
+ * handles controls and operations to work with layers
+ */
+
+class LayerStack {
+  /**
+   * @constructor
+   * @param pStage {HTMLElement} - html element that contains generated canvas layers
+   * @param pControlWrapper {HTMLElement} - html element that displays layer controls
+   * @param fPropagateActive {function} - function used to set the actual canvas context
+   */
+  constructor(pStage, pControlWrapper, fPropagateActive) {
+    this.stage = pStage;
+    this.layers = [];
+    this.layerControls = [];
+    this.controlWrapper = pControlWrapper;
+    this.propagateActive = fPropagateActive;
+    this.layerIdCount = 0;
+
+    // initialize first layer
+    this.createCanvas(this.layers.length);
+    // populate first layer as active layer
+    this.propagateActive(this.layers[0]);
+  }
+
+  /**
+   * creates a canvas element to the dom and the layer stack
+   * and adds a control element for the generated canvas element
+   * @returns {HTMLElement} - generated canvas element
+   */
+  createCanvas (){
+    const stage = this.stage;
+    const controlWrapper = this.controlWrapper;
+    const id = `layer${this.layerIdCount}`;
+
+    // create canvas element
+    let elem = document.createElement('canvas');
+
+    elem.setAttribute('class', 'layer');
+    elem.setAttribute('id', id);
+    elem.setAttribute('width', stage.clientWidth );
+    elem.setAttribute('height', stage.clientHeight );
+
+    // create layer control element
+    // add childrend and add eventListeners
+    let layerElem = document.createElement('div');
+
+    layerElem.setAttribute('class', 'layer-control active');
+    layerElem.setAttribute('id', `layerControl${this.layerIdCount}`);
+
+    let layerTitle = document.createElement('div');
+
+    layerTitle.setAttribute('class', 'layer-title');
+    layerTitle.innerText = `Layer ${this.layerIdCount + 1}`;
+
+    let layerActions = document.createElement('div');
+
+    layerActions.setAttribute('class', 'layer-actions');
+
+    let layerSelectAction = document.createElement('span');
+
+    layerSelectAction.addEventListener('click', () => { this.selectLayer(id);});
+
+    let layerSelectIcon = document.createElement('i');
+
+    layerSelectIcon.setAttribute('class', 'fas fa-pencil-alt fa-1x layer-action');
+
+    let layerHideAction = document.createElement('span');
+
+    layerHideAction.setAttribute('id', `layerControlHide${this.layerIdCount}`);
+    layerHideAction.addEventListener('click', () => { this.hideLayer(id);});
+
+    let layerHideIcon = document.createElement('i');
+
+    layerHideIcon.setAttribute('class', 'fas fa-eye fa-1x layer-action');
+
+    let layerDeleteAction = document.createElement('span');
+
+    layerDeleteAction.addEventListener('click', () => { this.deleteLayer(id); });
+
+    let layerDeleteIcon = document.createElement('i');
+
+    layerDeleteIcon.setAttribute('class', 'fas fa-trash fa-1x layer-action');
+
+    // append
+    stage.append(elem);
+    this.layers.push(elem);
+
+    // create nested layer Element
+    layerSelectAction.append(layerSelectIcon);
+    layerHideAction.append(layerHideIcon);
+    layerDeleteAction.append(layerDeleteIcon);
+
+    layerActions.append(layerSelectAction);
+    layerActions.append(layerHideAction);
+    layerActions.append(layerDeleteAction);
+
+    layerElem.append(layerTitle);
+    layerElem.append(layerActions);
+
+    // prepend layer control above other layers
+    controlWrapper.prepend(layerElem);
+    this.layerControls.push(layerElem);
+
+    this.selectLayer(id);
+
+    this.layerIdCount++;
+
+    return elem;
+  }
+
+  /**
+   * toggles layer visibility within the stage
+   * @param pId {String} - id of the html element (canvas) to be hidden
+   */
+  hideLayer(pId) {
+    let layer = this.getLayer(pId);
+
+    let layerControl = document.getElementById('layerControlHide'+ pId.substr(5));
+
+    layerControl.classList.toggle('layer-invisible');
+    layer.classList.toggle('hidden');
+  }
+
+  /**
+   * deletes a layer based on its id
+   * deletes the layer control and removes it from the layerstack
+   * @param pId {String} - id of the html element (canvas) to be hidden
+   */
+  deleteLayer(pId) {
+    let numericId = pId.substr(5);
+    let layer = this.getLayer(pId);
+    let layerControl = document.getElementById(`layerControl${numericId}`);
+
+    // get the index of the layer in layers stack
+    let index = this.layers.findIndex(layer => layer.id === pId);
+
+    // remove layer from layers stack
+    this.layers.splice(index, 1);
+    // remove layer from dom
+    layer.remove();
+    // remove layer control from dom
+    layerControl.remove();
+
+    // set first layer as active layer
+    this.selectLayer(this.layers[this.layers.length-1].id);
+  }
+
+  /**
+   * returns a layer based on its id
+   * @param pId {String} - id of the html element (canvas) to be returned
+   * @returns {HTMLElement} - returns found html element or undefined
+   */
+  getLayer(pId){
+    return this.layers.find((elem) => {
+      if(elem.id === pId) {
+        return elem;
+      }
+    });
+  }
+
+  /**
+   * propagates a layer to activate its context,
+   * marks layer control as active layer by adding a simple css class
+   * @param pId {String} - id of the html element (canvas) to be selected
+   */
+  selectLayer(pId){
+    const layer = this.getLayer(pId);
+
+    this.propagateActive(layer);
+
+    const numId = pId.substr(5);
+
+    this.layerControls.forEach((lc) => {
+      lc.classList.remove('active');
+    });
+
+    document.getElementById('layerControl' + numId).classList.add('active');
+  }
+
+  /**
+   * resets the current project layerstack, controls to defaults
+   */
+  reset(){
+    this.layers = [];
+    this.layerControls = [];
+    this.layerIdCount = 0;
+    this.controlWrapper.innerHTML = '';
+    let layers = document.querySelectorAll('.layer');
+
+    layers.forEach( el => el.remove());
+  }
+
+  /**
+   * restores a project from local storage
+   * @param pProject {Array} - array of layer image data uris for the content of each layer
+   */
+  restore(pProject){
+    this.reset();
+    const images = [];
+    const canvases = [];
+
+    Object.keys(pProject).forEach(key => {
+      let img = new Image;
+      let canvas = this.createCanvas();
+
+      img.src = pProject[key];
+      images.push(img);
+      canvases.push(canvas);
+    });
+
+    setTimeout(() => {
+      for(let i = 0; i &lt; images.length; i++){
+        let ctx = canvases[i].getContext('2d');
+
+        ctx.drawImage(images[i],0,0);
+      }
+    }, 500);
+  }
+}
+
+export { LayerStack };
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Copyright © 2019 by Konstantin Kraska, License <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA-4.0</a>
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a>
+	
+		on 2019-07-14T23:23:36+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

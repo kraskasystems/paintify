@@ -274,6 +274,11 @@ class Paintify {
    */
   draw(event){
     if(!this.actionsModal){
+      // check if a layer exists, otherwise add a new layer
+      if(this.activateLayer === ''){
+        this.layerStack.createCanvas();
+      }
+
       // get active layer context
       const ctx = this.activeLayer.getContext('2d');
 
@@ -451,7 +456,7 @@ class Paintify {
       project[layer.id] = layer.toDataURL('image/png');
     });
 
-    save(project, () => { alert('Project Saved');});
+    save(project, () => { alert('Project saved.'); this.toggleMenu();});
   }
 
   /**
@@ -460,7 +465,7 @@ class Paintify {
   loadProject(){
     const project = (err, data) => {
       if(data !== undefined && data !== null){
-        this.layerStack.restore(data);
+        this.layerStack.restore(data, this.toggleMenu.bind(this));
       }
       else { alert('No previous saved project available.');}
     };

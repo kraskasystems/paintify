@@ -130,22 +130,26 @@ class LayerStack {
    * @param pId {String} - id of the html element (canvas) to be hidden
    */
   deleteLayer(pId) {
-    let numericId = pId.substr(5);
-    let layer = this.getLayer(pId);
-    let layerControl = document.getElementById(`layerControl${numericId}`);
+    if(this.layers.length < 2){
+      alert('You need at least 1 layer for painting');
+    } else {
+      let numericId = pId.substr(5);
+      let layer = this.getLayer(pId);
+      let layerControl = document.getElementById(`layerControl${numericId}`);
 
-    // get the index of the layer in layers stack
-    let index = this.layers.findIndex(layer => layer.id === pId);
+      // get the index of the layer in layers stack
+      let index = this.layers.findIndex(layer => layer.id === pId);
 
-    // remove layer from layers stack
-    this.layers.splice(index, 1);
-    // remove layer from dom
-    layer.remove();
-    // remove layer control from dom
-    layerControl.remove();
+      // remove layer from layers stack
+      this.layers.splice(index, 1);
+      // remove layer from dom
+      layer.remove();
+      // remove layer control from dom
+      layerControl.remove();
 
-    // set first layer as active layer
-    this.selectLayer(this.layers[this.layers.length-1].id);
+      // set first layer as active layer
+      this.selectLayer(this.layers[this.layers.length-1].id);
+    }
   }
 
   /**
@@ -196,8 +200,9 @@ class LayerStack {
   /**
    * restores a project from local storage
    * @param pProject {Array} - array of layer image data uris for the content of each layer
+   * @param fCallback {function} - callback function
    */
-  restore(pProject){
+  restore(pProject, fCallback){
     // perform reset
     this.reset();
     const images = [];
@@ -222,6 +227,8 @@ class LayerStack {
 
         ctx.drawImage(images[i],0,0);
       }
+      // execute callback
+      fCallback();
     }, 500);
   }
 }

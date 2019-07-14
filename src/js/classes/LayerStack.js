@@ -1,4 +1,16 @@
+/**
+ * @class LayerStack
+ * instantinates a layer stack for layered images
+ * handles controls and operations to work with layers
+ */
+
 class LayerStack {
+  /**
+   * @constructor
+   * @param pStage {HTMLElement} - html element that contains generated canvas layers
+   * @param pControlWrapper {HTMLElement} - html element that displays layer controls
+   * @param fPropagateActive {function} - function used to set the actual canvas context
+   */
   constructor(pStage, pControlWrapper, fPropagateActive) {
     this.stage = pStage;
     this.layers = [];
@@ -9,13 +21,21 @@ class LayerStack {
 
     // initialize first layer
     this.createCanvas(this.layers.length);
+    // populate first layer as active layer
+    this.propagateActive(this.layers[0]);
   }
 
+  /**
+   * creates a canvas element to the dom and the layer stack
+   * and adds a control element for the generated canvas element
+   * @returns {HTMLElement} - generated canvas element
+   */
   createCanvas (){
     const stage = this.stage;
     const controlWrapper = this.controlWrapper;
     const id = `layer${this.layerIdCount}`;
 
+    // create canvas element
     let elem = document.createElement('canvas');
 
     elem.setAttribute('class', 'layer');
@@ -23,6 +43,8 @@ class LayerStack {
     elem.setAttribute('width', stage.clientWidth );
     elem.setAttribute('height', stage.clientHeight );
 
+    // create layer control element
+    // add childrend and add eventListeners
     let layerElem = document.createElement('div');
 
     layerElem.setAttribute('class', 'layer-control active');
@@ -62,21 +84,23 @@ class LayerStack {
 
     layerDeleteIcon.setAttribute('class', 'fas fa-trash fa-1x layer-action');
 
-    stage.appendChild(elem);
+    // append
+    stage.append(elem);
     this.layers.push(elem);
 
     // create nested layer Element
-    layerSelectAction.appendChild(layerSelectIcon);
-    layerHideAction.appendChild(layerHideIcon);
-    layerDeleteAction.appendChild(layerDeleteIcon);
+    layerSelectAction.append(layerSelectIcon);
+    layerHideAction.append(layerHideIcon);
+    layerDeleteAction.append(layerDeleteIcon);
 
-    layerActions.appendChild(layerSelectAction);
-    layerActions.appendChild(layerHideAction);
-    layerActions.appendChild(layerDeleteAction);
+    layerActions.append(layerSelectAction);
+    layerActions.append(layerHideAction);
+    layerActions.append(layerDeleteAction);
 
-    layerElem.appendChild(layerTitle);
-    layerElem.appendChild(layerActions);
+    layerElem.append(layerTitle);
+    layerElem.append(layerActions);
 
+    // prepend layer control above other layers
     controlWrapper.prepend(layerElem);
     this.layerControls.push(layerElem);
 
@@ -87,6 +111,10 @@ class LayerStack {
     return elem;
   }
 
+  /**
+   * toggles layer visibility within the stage
+   * @param pId {String} - id of the html element (canvas) to be hidden
+   */
   hideLayer(pId) {
     let layer = this.getLayer(pId);
 
@@ -96,6 +124,11 @@ class LayerStack {
     layer.classList.toggle('hidden');
   }
 
+  /**
+   * deletes a layer based on its id
+   * deletes the layer control and removes it from the layerstack
+   * @param pId {String} - id of the html element (canvas) to be hidden
+   */
   deleteLayer(pId) {
     let numericId = pId.substr(5);
     let layer = this.getLayer(pId);
@@ -115,6 +148,11 @@ class LayerStack {
     this.selectLayer(this.layers[this.layers.length-1].id);
   }
 
+  /**
+   * returns a layer based on its id
+   * @param pId {String} - id of the html element (canvas) to be returned
+   * @returns {HTMLElement} - returns found html element or undefined
+   */
   getLayer(pId){
     return this.layers.find((elem) => {
       if(elem.id === pId) {
@@ -123,6 +161,11 @@ class LayerStack {
     });
   }
 
+  /**
+   * propagates a layer to activate its context,
+   * marks layer control as active layer by adding a simple css class
+   * @param pId {String} - id of the html element (canvas) to be selected
+   */
   selectLayer(pId){
     const layer = this.getLayer(pId);
 
@@ -137,6 +180,9 @@ class LayerStack {
     document.getElementById('layerControl' + numId).classList.add('active');
   }
 
+  /**
+   * resets the current project layerstack, controls to defaults
+   */
   reset(){
     this.layers = [];
     this.layerControls = [];
@@ -147,11 +193,18 @@ class LayerStack {
     layers.forEach( el => el.remove());
   }
 
+  /**
+   * restores a project from local storage
+   * @param pProject {Array} - array of layer image data uris for the content of each layer
+   */
   restore(pProject){
+    // perform reset
     this.reset();
     const images = [];
     const canvases = [];
 
+    // get image data from saved project / data uris
+    // generate new canvas elements
     Object.keys(pProject).forEach(key => {
       let img = new Image;
       let canvas = this.createCanvas();
@@ -161,7 +214,9 @@ class LayerStack {
       canvases.push(canvas);
     });
 
+    // set timeout to load images
     setTimeout(() => {
+      // match images to layers
       for(let i = 0; i < images.length; i++){
         let ctx = canvases[i].getContext('2d');
 

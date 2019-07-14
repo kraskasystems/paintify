@@ -1,3 +1,9 @@
+/**
+ * function to save data to the localStorage
+ * @param data {Object} - data to be stringified and stored
+ * @param callback
+ */
+
 const save = function (data, callback) {
   setTimeout(() => {
     let err = null;
@@ -10,6 +16,11 @@ const save = function (data, callback) {
     callback(err);
   }, 1000); // fake a response delay with 1000ms
 };
+
+/**
+ * function to load data from the localStorage
+ * @param callback
+ */
 
 const load = function (callback) {
   setTimeout(() => {

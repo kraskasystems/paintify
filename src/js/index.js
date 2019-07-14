@@ -29,6 +29,7 @@ const init = async function(){
   // initialize paintify - hidden behind splash screen
   new Paintify({config: appConfig});
 
+  // wait for promise resolve from wait
   // fade out splash screen after 2 s
   await wait(2000);
   splashScreen.classList.remove('visible');

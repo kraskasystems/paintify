@@ -1,10 +1,39 @@
-import { Brush } from './Brush';
-import { LayerStack } from './LayerStack';
-import { save, load } from '../util/fakeServer';
-import { calculateDistance } from '../util/calculateDistance';
-import { getRandomInt } from '../util/randomInt';
+import { Brush }              from './Brush';
+import { LayerStack }         from './LayerStack';
+import { save, load }         from '../util/fakeServer';
+import { calculateDistance }  from '../util/calculateDistance';
+import { getRandomInt }       from '../util/randomInt';
+
+/**
+ * @class Paintify
+ * instantinates a paintify object that handles simple canvas painting
+ */
 
 class Paintify {
+  /**
+   * @constructor
+   * @param {{colorSet: Object,
+   *          dom: Object}} pConfig
+   *
+   * @param pConfig.colorSet {Array}               - array of colors <code>{ "name": "yellow", "hexValue": "FFD747"}</code>
+   * @param pConfig.dom {Object}                   - HTML Element Ids to mount paintify functionality to
+   * @param pConfig.dom.brush {String}             - element to trigger brush tool activation
+   * @param pConfig.dom.eraser {String}            - element to trigger eraser tool activation
+   * @param pConfig.dom.circle {String}            - element to trigger circle tool activation
+   * @param pConfig.dom.rectangle {String}         - element to trigger rectangle tool activation
+   * @param pConfig.dom.colorBomb {String}         - element to trigger color bomb tool activation
+   * @param pConfig.dom.reset {String}             - element to reset to defaults
+   * @param pConfig.dom.addLayer {String}          - element to add a new layer
+   * @param pConfig.dom.stage {String}             - element that contains created layers
+   * @param pConfig.dom.layerControl {String}      - element that contains layer controls
+   * @param pConfig.dom.colorPalette {String}      - element to mount colors based on colorSet config
+   * @param pConfig.dom.menuToggle {String}        - element that toggles main menu
+   * @param pConfig.dom.menuClose {String}         - element that closes main menu
+   * @param pConfig.dom.saveProject {String}       - button to save project to local storage
+   * @param pConfig.dom.loadProject {String}       - button to load recent project from local storage
+   * @param pConfig.dom.downloadImage {String}     - button to download artwork as png
+   * @param pConfig.dom.downloadActiveLayer {String} - button to download recently activated layer
+   */
   constructor({ config: pConfig }){
     this.config = pConfig;
     this.drawPosition = {x: 0, y: 0};
@@ -16,15 +45,19 @@ class Paintify {
     this.domElements = {};
     this.domControls = {};
 
+    // bind this to use this method in other contexts
     this.activateLayer = this.activateLayer.bind(this);
     this.initApp();
   }
 
+  /**
+   * initializes the paintify instance based on paintify.config.json
+   */
   initApp(){
     const config = this.config;
     const domElements = this.domElements;
 
-    // set configured dom elements
+    // get elements from dom and set configured dom elements
     Object.keys(config.dom).forEach((key) => {
       domElements[key] = document.getElementById(config.dom[key]);
     });
@@ -45,17 +78,22 @@ class Paintify {
     this.initColorBomb(domElements);
 
     // initialize color palette
-    this.initColorPalette(config, domElements);
+    this.initColorPalette(config.colorSet, domElements);
 
-    // initialize layer stack
-    this.initLayerStack(domElements.stage, domElements.layerSystemWrapper);
+    // initialize layerstack
+    this.layerStack =
+      new LayerStack(
+        domElements.stage,
+        domElements.layerControl,
+        this.activateLayer
+      );
 
     // init windowListeners
     this.initWindowListeners();
 
     // initialize further buttons
     domElements.reset.addEventListener('click', () => { this.layerStack.reset(); this.layerStack.createCanvas(); });
-    domElements.addLayer.addEventListener('click', () => { this.addLayer(); });
+    domElements.addLayer.addEventListener('click', () => { this.layerStack.createCanvas(); });
     domElements.menuToggle.addEventListener('click', () => { this.toggleMenu(); });
     domElements.menuClose.addEventListener('click', () => { this.toggleMenu(); });
     domElements.saveProject.addEventListener('click', () => { this.saveProject(); });
@@ -63,6 +101,12 @@ class Paintify {
     domElements.downloadImage.addEventListener('click', () => { this.downloadMergedImage();});
     domElements.downloadActiveLayer.addEventListener('click', () => {this.downloadLayerImage();});
   }
+
+  /**
+   * initializes the brush tool based on Brush class
+   * adds a eventlistener to html element and adds tools to instance domControls
+   * @param dom {HTMLElement} - HTML Element matched to id from pConfig.dom.brush
+   */
 
   initBrush(dom){
     // initialize paintify brush instance
@@ -75,6 +119,12 @@ class Paintify {
     this.activeTool = 'brush';
   }
 
+  /**
+   * initializes the eraser tool based on Brush class
+   * adds a eventlistener to html element and adds tools to instance domControls
+   * @param dom {HTMLElement} - HTML Element matched to id from pConfig.dom.eraser
+   */
+
   initEraser(dom){
     // initialize paintify eraser instance
     this.eraser = new Brush(dom.eraser);
@@ -85,6 +135,11 @@ class Paintify {
     });
   }
 
+  /**
+   * initializes the circle tool
+   * adds a eventlistener to html element and adds tools to instance domControls
+   * @param dom {HTMLElement} - HTML Element matched to id from pConfig.dom.circle
+   */
   initCircleTool(dom){
     dom.circle.addEventListener('click', () => {
       this.activeTool = 'circle';
@@ -94,6 +149,11 @@ class Paintify {
     this.domControls['circle'] = dom.circle;
   }
 
+  /**
+   * initializes the rectangle tool,
+   * adds a eventlistener to html element and adds tools to instance domControls
+   * @param dom {HTMLElement} - HTML Element matched to id from pConfig.dom.rectangle
+   */
   initRectTool(dom){
     dom.rectangle.addEventListener('click', () => {
       this.activeTool = 'rectangle';
@@ -103,6 +163,11 @@ class Paintify {
     this.domControls['rectangle'] = dom.rectangle;
   }
 
+  /**
+   * initializes the color bomb tool,
+   * adds a eventlistener to html element and adds tools to instance domControls
+   * @param dom {HTMLElement} - HTML Element matched to id from pConfig.dom.colorBomb
+   */
   initColorBomb(dom){
     dom.colorBomb.addEventListener('click', () => {
       this.activeTool = 'bomb';
@@ -112,10 +177,15 @@ class Paintify {
     this.domControls['bomb'] = dom.colorBomb;
   }
 
-  initColorPalette(config, controls){
+  /**
+   * generates color controls and mounts controls to the dom
+   * @param pColorSet {Array} - array of colors set in config.colorSet
+   * @param pControls {Object} - HTML Elements created from init method
+   */
+  initColorPalette(pColorSet, pControls){
     let i = 0;
 
-    config.colorSet.forEach((color) => {
+    pColorSet.forEach((color) => {
       let elem = document.createElement('div');
 
       elem.setAttribute('class', 'colorElement');
@@ -128,18 +198,16 @@ class Paintify {
         this.activeColor = document.getElementById(event.target.id).getAttribute('data-value');
       });
 
-      controls.colorPalette.appendChild(elem);
+      pControls.colorPalette.appendChild(elem);
       i++;
     });
 
-    this.activeColor = config.colorSet[0].hexValue;
+    this.activeColor = pColorSet[0].hexValue;
   }
 
-  initLayerStack(stage, layerWrapper){
-    this.layerStack = new LayerStack(stage, layerWrapper, this.activateLayer);
-    this.activeLayer = this.layerStack.layers[0];
-  }
-
+  /**
+   * initializes window listeners for mouse events
+   */
   initWindowListeners(){
     this.domElements.stage.addEventListener('mousemove', (e) => {
       this.draw(e);
@@ -158,14 +226,18 @@ class Paintify {
     });
   }
 
-  addLayer(){
-    this.layerStack.createCanvas();
-  }
-
+  /**
+   * activates a specific layer to draw on
+   * @param pLayer {HTMLCanvasElement}
+   */
   activateLayer(pLayer){
     this.activeLayer = pLayer;
   }
 
+  /**
+   * adds css class to active tool control
+   * @param pTool {String} - tool string name
+   */
   setActiveToolClass(pTool){
     const tools = this.domControls;
 
@@ -178,16 +250,28 @@ class Paintify {
     });
   }
 
+  /**
+   * sets current mouse position
+   * @param event {MouseEvent} - event delivers positional data
+   */
   setDrawPosition(event){
     this.drawPosition.x = event.clientX - 70;
     this.drawPosition.y = event.clientY;
   }
 
+  /**
+   * sets current mouse position for distance measuring (circle, rectangle)
+   * @param event {MouseEvent} - event delivers positional data
+   */
   setMeasurePosition(event){
     this.distanceFrom.x = event.clientX - 70;
     this.distanceFrom.y = event.clientY;
   }
 
+  /**
+   * checks activated tool and recieves context from activated layer
+   * @param event {MouseEvent} - mousemove
+   */
   draw(event){
     if(!this.actionsModal){
       // get active layer context
@@ -217,11 +301,16 @@ class Paintify {
           this.drawBomb(ctx);
           break;
         }
-
       }
     }
   }
 
+  /**
+   * draws a brush stroke to the active layer / canvas
+   * @param event {MouseEvent} - event used for positioning
+   * @param ctx {CanvasRenderingContext2D} - context of active layer (canvas element)
+   * @param color {String} - HEX value of color to draw with
+   */
   drawBrushStroke(event, ctx, color){
     ctx.beginPath();
     ctx.lineWidth = this.brush.size;
@@ -235,6 +324,11 @@ class Paintify {
     ctx.closePath();
   }
 
+  /**
+   * erases parts of the active layer / canvas element
+   * @param event {MouseEvent} - event used for positioning
+   * @param ctx {CanvasRenderingContext2D} - context of active layer (canvas element)
+   */
   erase(event, ctx){
     ctx.beginPath();
     ctx.lineWidth = this.eraser.size;
@@ -247,6 +341,11 @@ class Paintify {
     ctx.closePath();
   }
 
+  /**
+   * draws a circle on the active layer / canvas element
+   * @param ctx {CanvasRenderingContext2D} - context of active layer (canvas element)
+   * @param color {String} - HEX value of color to draw with
+   */
   drawCircle(ctx, color) {
     let dist = calculateDistance(this.drawPosition, this.distanceFrom);
 
@@ -258,6 +357,11 @@ class Paintify {
     ctx.closePath();
   }
 
+  /**
+   * draws a rectangle on the active layer / canvas element
+   * @param ctx {CanvasRenderingContext2D} - context of active layer (canvas element)
+   * @param color {String} - HEX value of color to draw with
+   */
   drawRectangle(ctx, color) {
     let xLen = Math.abs(this.distanceFrom.x - this.drawPosition.x);
     let yLen = Math.abs(this.distanceFrom.y - this.drawPosition.y);
@@ -269,6 +373,10 @@ class Paintify {
     ctx.closePath();
   }
 
+  /**
+   * draws multiple circles with various diameters and colors around mouse position
+   * @param ctx {CanvasRenderingContext2D} - context of active layer (canvas element)
+   */
   drawBomb(ctx){
     let colorSet = this.config.colorSet;
     let color = 0;
@@ -291,6 +399,10 @@ class Paintify {
     }
   }
 
+  /**
+   * sets the brush size of either brush or eraser if activated
+   * @param event {MouseEvent} - wheel
+   */
   setBrushSize(event){
     const activeTool = this.activeTool;
     let tool = this.brush;
@@ -302,12 +414,14 @@ class Paintify {
     tool.changeBrushSize(event);
   }
 
+  /**
+   * Method to assist user while painting, displays brush or eraser dimensions
+   * @param event {MouseEvent} - used to obtain mouse position
+   */
   drawStrokeThickness(event){
-
     const thicknessElem = document.getElementById('strokeHelper');
 
     if(!this.actionsModal && (this.activeTool === 'brush' || this.activeTool === 'eraser')){
-
 
       const activeTool = this.activeTool;
       let tool = this.brush;
@@ -326,6 +440,9 @@ class Paintify {
     }
   }
 
+  /**
+   * saves a project to the localStorage
+   */
   saveProject(){
     const layers = this.layerStack.layers;
     const project = {};
@@ -337,12 +454,23 @@ class Paintify {
     save(project, () => { alert('Project Saved');});
   }
 
+  /**
+   * loads a project from the localStorage
+   */
   loadProject(){
-    const project = (err, data) => {this.layerStack.restore(data);};
+    const project = (err, data) => {
+      if(data !== undefined && data !== null){
+        this.layerStack.restore(data);
+      }
+      else { alert('No previous saved project available.');}
+    };
 
     load(project);
   }
 
+  /**
+   * downloads the artwork / project by merging layers to a single image png file
+   */
   downloadMergedImage(){
     // create new canvas element to merge all layers
     const merged = this.layerStack.createCanvas();
@@ -358,6 +486,9 @@ class Paintify {
     this.layerStack.deleteLayer(merged.id);
   }
 
+  /**
+   * downloads the active layer as png file
+   */
   downloadLayerImage(){
     const image = this.activeLayer.toDataURL('image/png');
     const tmpLink = document.createElement('a');
@@ -370,6 +501,9 @@ class Paintify {
     document.body.removeChild(tmpLink);
   }
 
+  /**
+   * toggles the menu
+   */
   toggleMenu() {
     if(this.actionsModal){
       this.actionsModal = false;

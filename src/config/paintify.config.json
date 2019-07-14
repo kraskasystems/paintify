@@ -16,7 +16,7 @@
     "reset": "toolReset",
     "addLayer": "addLayerBtn",
     "stage": "stage",
-    "layerSystemWrapper": "layers",
+    "layerControl": "layers",
     "colorPalette": "colorPalette",
     "menuToggle": "menuToggle",
     "menuClose": "menuClose",

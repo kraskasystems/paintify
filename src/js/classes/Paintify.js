@@ -497,13 +497,16 @@ class Paintify {
   downloadLayerImage(){
     const image = this.activeLayer.toDataURL('image/png');
     const tmpLink = document.createElement('a');
+    const date = new Date();
 
-    tmpLink.download = 'paintify.png';
+    tmpLink.download = `paintify_${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}_${date.getHours()}${date.getMinutes()}${date.getSeconds()}.png`;
     tmpLink.href = image;
 
     document.body.appendChild(tmpLink);
     tmpLink.click();
     document.body.removeChild(tmpLink);
+
+    this.toggleMenu();
   }
 
   /**

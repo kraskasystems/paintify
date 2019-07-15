@@ -45,7 +45,7 @@ class Paintify {
     this.domElements = {};
     this.domControls = {};
 
-    // bind this to use this method in other contexts
+    // bind this to use method in other contexts
     this.activateLayer = this.activateLayer.bind(this);
     this.initApp();
   }
@@ -88,8 +88,8 @@ class Paintify {
         this.activateLayer
       );
 
-    // init windowListeners
-    this.initWindowListeners();
+    // init stage listeners for drawing
+    this.initStageListeners();
 
     // initialize further buttons
     domElements.reset.addEventListener('click', () => { this.layerStack.reset(); this.layerStack.createCanvas(); });
@@ -206,9 +206,9 @@ class Paintify {
   }
 
   /**
-   * initializes window listeners for mouse events
+   * initializes stage listeners for mouse events
    */
-  initWindowListeners(){
+  initStageListeners(){
     this.domElements.stage.addEventListener('mousemove', (e) => {
       this.draw(e);
       this.drawStrokeThickness(e);
@@ -252,7 +252,7 @@ class Paintify {
 
   /**
    * sets current mouse position
-   * @param event {MouseEvent} - event delivers positional data
+   * @param event {MouseEvent} - mousemove event delivers positional data
    */
   setDrawPosition(event){
     this.drawPosition.x = event.clientX - 70;
@@ -261,7 +261,7 @@ class Paintify {
 
   /**
    * sets current mouse position for distance measuring (circle, rectangle)
-   * @param event {MouseEvent} - event delivers positional data
+   * @param event {MouseEvent} - mousedown event delivers positional data
    */
   setMeasurePosition(event){
     this.distanceFrom.x = event.clientX - 70;

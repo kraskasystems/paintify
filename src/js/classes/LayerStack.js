@@ -20,7 +20,7 @@ class LayerStack {
     this.layerIdCount = 0;
 
     // initialize first layer
-    this.createCanvas(this.layers.length);
+    this.createCanvas();
     // populate first layer as active layer
     this.propagateActive(this.layers[0]);
   }

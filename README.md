@@ -1,6 +1,6 @@
 # Paintify
 
-##Project structure - directories
+## Project structure - directories
 dist - bundled build<br>
 doc/jsdoc - documentation<br>
 src - sourcefiles
